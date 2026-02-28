@@ -30,19 +30,23 @@ if 'chain' not in st.session_state:
 st.title("🛡️ Blockchain Certificate System")
 st.markdown("---")
 
-# Section 1: Core - Auth & Upload
+# Section 1: Core - Auth & File Upload
 st.sidebar.header("Admin: Issue Certificate")
 issuer_name = st.sidebar.text_input("Issuer Name")
-student_id = st.sidebar.text_input("Student ID/Name")
+uploaded_file = st.sidebar.file_picker("Upload Certificate (PDF/JPG)") # NEW
 
 if st.sidebar.button("Issue & Hash Certificate"):
-    if issuer_name and student_id:
-        data = f"Issuer: {issuer_name} | Recipient: {student_id}"
+    if issuer_name and uploaded_file is not None:
+        # Read the file contents as bytes to ensure unique hashing
+        file_bytes = uploaded_file.getvalue()
+        file_hash = hashlib.sha256(file_bytes).hexdigest()
+        
+        data = f"Issuer: {issuer_name} | File: {uploaded_file.name} | Hash: {file_hash}"
         new_block = create_block(data, st.session_state.chain[-1]['hash'])
         st.session_state.chain.append(new_block)
-        st.sidebar.success("Certificate Added to Blockchain!")
+        st.sidebar.success(f"Certificate {uploaded_file.name} Authenticated!")
     else:
-        st.sidebar.error("Fill in all fields")
+        st.sidebar.error("Please provide Issuer Name and a File.")
 
 # Section 2: Core - Verification Lookup
 st.header("🔍 Verification Lookup")
