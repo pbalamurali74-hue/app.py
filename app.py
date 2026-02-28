@@ -122,25 +122,20 @@ def check_forensics(image_file):
     # Check for common editing software signatures
     if "Software" in details:
         return f"🚨 EDITED: Created/Modified with {details['Software']}"
-    from PIL import Image
-from PIL.ExifTags import TAGS
-
-def check_forensics(image_file):
-    img = Image.open(image_file)
-    exif_data = img.getexif()
-    
-    if not exif_data:
-        return "⚠️ WARNING: No Metadata found. Possible AI generation or stripped file."
-    
-    details = {}
-    for tag_id in exif_data:
-        tag_name = TAGS.get(tag_id, tag_id)
-        details[tag_name] = exif_data.get(tag_id)
         
-    # Check for common editing software signatures
-    if "Software" in details:
-        return f"🚨 EDITED: Created/Modified with {details['Software']}"
-        
+if uploaded_file:
+    # 1. Check for Edits/Metadata
+    forensic_result = check_forensics(uploaded_file)
+    st.info(forensic_result)
+    
+    # 2. Check if AI-Generated
+    with st.spinner("Analyzing with AI..."):
+        ai_label = detect_ai_generated(Image.open(uploaded_file))
+        if "ai" in ai_label.lower():
+            st.error(f"Prediction: {ai_label} (Likely AI-Generated)")
+        else:
+            st.success("Prediction: Likely Human/Official Document")
+            
 # Advanced: Simulation of Tamper Logic
 if st.button("🚨 Simulate Tamper (Break Chain)"):
     if len(st.session_state.chain) > 1:
