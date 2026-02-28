@@ -103,6 +103,7 @@ def detect_ai_generated(image):
     predicted_class_idx = logits.argmax(-1).item()
     label = model.config.id2label[predicted_class_idx]
     return label
+    
 from PIL import Image
 from PIL.ExifTags import TAGS
 
