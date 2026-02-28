@@ -85,6 +85,24 @@ for i, block in enumerate(st.session_state.chain):
             st.success("✅ STATUS: SECURE")
             
         st.json(block)
+from transformers import AutoImageProcessor, AutoModelForImageClassification
+import torch
+from PIL import Image
+
+# Load the model once (e.g., SDXL-detector)
+processor = AutoImageProcessor.from_pretrained("Organika/sdxl-detector")
+model = AutoModelForImageClassification.from_pretrained("Organika/sdxl-detector")
+
+def detect_ai_generated(image):
+    inputs = processor(images=image, return_tensors="pt")
+    with torch.no_grad():
+        outputs = model(**inputs)
+        logits = outputs.logits
+    
+    # Get prediction label
+    predicted_class_idx = logits.argmax(-1).item()
+    label = model.config.id2label[predicted_class_idx]
+    return label
 
 # Advanced: Simulation of Tamper Logic
 if st.button("🚨 Simulate Tamper (Break Chain)"):
