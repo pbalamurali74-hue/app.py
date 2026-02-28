@@ -33,20 +33,25 @@ st.markdown("---")
 # Section 1: Core - Auth & File Upload
 st.sidebar.header("Admin: Issue Certificate")
 issuer_name = st.sidebar.text_input("Issuer Name")
-uploaded_file = st.sidebar.file_picker("Upload Certificate (PDF/JPG)") # NEW
+
+# CORRECTED COMMAND: Using file_uploader instead of file_picker
+uploaded_file = st.sidebar.file_uploader("Upload Certificate (PDF/JPG/PNG)") 
 
 if st.sidebar.button("Issue & Hash Certificate"):
     if issuer_name and uploaded_file is not None:
-        # Read the file contents as bytes to ensure unique hashing
+        # Read the file's binary content to create a unique hash
         file_bytes = uploaded_file.getvalue()
         file_hash = hashlib.sha256(file_bytes).hexdigest()
         
-        data = f"Issuer: {issuer_name} | File: {uploaded_file.name} | Hash: {file_hash}"
+        # Store metadata in the block
+        data = f"Issuer: {issuer_name} | File: {uploaded_file.name} | Cert_Hash: {file_hash}"
+        
         new_block = create_block(data, st.session_state.chain[-1]['hash'])
         st.session_state.chain.append(new_block)
-        st.sidebar.success(f"Certificate {uploaded_file.name} Authenticated!")
+        st.sidebar.success(f"Successfully Added: {uploaded_file.name}")
     else:
-        st.sidebar.error("Please provide Issuer Name and a File.")
+        st.sidebar.error("Missing Issuer Name or File!")
+
 
 # Section 2: Core - Verification Lookup
 st.header("🔍 Verification Lookup")
